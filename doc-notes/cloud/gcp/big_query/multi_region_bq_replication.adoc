@@ -1,0 +1,74 @@
+== Theory
+
+* multi-region is a large geographic area that contains two or more geographic regions
+*  In all regions, replication between zones uses synchronous dual writes
+* Selecting a multi-region location does not provide cross-region replication or regional redundancy, so there is no increase in dataset availability in the event of a regional outage
+
+* For additional geo-redundancy, you can replicate any dataset. BigQuery creates a secondary replica of the dataset, located in another region that you specify. This replica is then asynchronously replicated between two zones with the other region, for a total of four zonal copies.
+
+[NOTE]
+----
+* while a dataset can be created  using mult region, data is not replicated
+----
+
+* Data set replication
+
+** Primary region. When you first create a dataset, BigQuery places the dataset in the primary region.
+** Secondary region. When you add a dataset replica, BigQuery places the replica in the secondary region.
+** The primar replica is writeable, and the secondary replica is read-only.
+
+** Replicaotion
+*** The primary replica is writeable, and the secondary replica is read-only.
+*** On disaster the secondary can be activated and read can be routed, but writes would not be possible
+
+
+* Promotion of secondary replica
+**  Promotion switches the secondary replica to be the writeable primary.
+** This operation completes within a few seconds if the secondary replica is caught up with the primary replica.
+** If the secondary replica is not caught up, the promotion can't complete until it is caught up. (?) -- cannot be done if primary region has an outage
+** All writes to tables return errors while promotion is in process.
+** The old primary replica becomes non-writable immediately when the promotion begins.
+** Done via a job of alter command [ALTER SCHEMA my_dataset SET OPTIONS(primary_replica = 'us-east4')]
+
+* Pricing
+** Sotage (replication)
+** Data replication
+** To run jobs and queries against the replica in the secondary region, you must purchase slots within the secondary region or run an on-demand query.
+
+* Creation / implementation
+
+** Core creation
+*** create a dataset using the primary region
+*** confirm primary region
+```
+SELECT
+  schema_name,
+  location
+FROM
+  `sab-dev-riq-ml-commons-8034`.`region-EU`.INFORMATION_SCHEMA.SCHEMATA -- If your dataset is in the EU multi-region
+WHERE
+  schema_name = 'TB_DR_POC';
+
+```
+
+** Replica creation
+*** Creation script
+```
+-- ALTER SCHEMA TB_DR_POC
+-- ADD REPLICA `TB_DR_POC_REPLICA`
+-- OPTIONS(location='us-central1');
+
+```
+
+*** Checking replication status
+```
+* SELECT * FROM `sab-dev-riq-ml-commons-8034`.`region-us-central1`.INFORMATION_SCHEMA.SCHEMATA_REPLICAS;
+* SELECT * FROM `region-us-central1`.INFORMATION_SCHEMA.TABLES WHERE table_schema = 'TB_DR_POC_REPLICA';
+```
+
+
+** Pricing
+
+
+
+

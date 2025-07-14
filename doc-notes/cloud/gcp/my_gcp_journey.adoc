@@ -1,0 +1,172 @@
+:author: Tushar Bisht
+:email: tushar.bisht@sabre.com
+:revdate: 2025-01-28
+:encoding: utf-8
+:toc: macro
+:table-caption: Table
+:icons: font
+
+:sectnums:
+
+= Notes on GCP journey and learning
+
+<<<
+
+:toc: macro
+:toclevels: 4
+toc::[]
+
+== Operation details
+
+* Select REGION: asia-south1-a
+* Test pr0ject id : civic-brand-462209-t4
+** Test project number: 904819058287
+
+
+
+
+=== Rough
+
+docker build -t asia-south1-docker.pkg.dev/civic-brand-462209-t4/test-repo/hello-app:v1 .
+docker run --rm -p 8080:8080 asia-south1-docker.pkg.dev/civic-brand-462209-t4/test-repo/hello-app:v1
+
+
+
+
+
+
+== IAM roles & SA
+
+* enabling compute engine API creates service account for compute engine
+
+----
+gcloud projects get-iam-policy civic-brand-462209-t4 --filter="bindings.members:darkcrawler.in@gmail.com"
+----
+
+== Artifact registry
+
+----
+gcloud artifacts repositories create test_repo \
+--repository-format=docker \
+--location=asia-south1 \
+--description="Docker repository"
+----
+
+* listing repos --> gcloud artifacts repositories list --location=asia-south1
+
+* listing images in repo
+
+----
+gcloud artifacts docker images list asia-south1-docker.pkg.dev/civic-brand-462209-t4/test-repo
+----
+
+
+* giving access of read only to a compute service account
+
+----
+gcloud artifacts repositories add-iam-policy-binding test-repo \
+--location=asia-south1 \
+--member=serviceAccount:904819058287-compute@developer.gserviceaccount.com \
+--role="roles/artifactregistry.reader"
+----
+
+
+* pushing docker image to the artefact registry
+
+** Configure the Docker command-line tool to authenticate to Artifact Registry:
+----
+gcloud auth configure-docker asia-south1-docker.pkg.dev
+----
+** Build Push the image
+----
+docker build -t asia-south1-docker.pkg.dev/civic-brand-462209-t4/test-repo/hello-app:v2 .
+docker push asia-south1-docker.pkg.dev/civic-brand-462209-t4/test-repo/hello-app:v2 //image name
+----
+
+
+== GKE
+
+=== Creation of GKE cluster from shell
+
+* gcloud config set compute/region asia-south1 --project civic-brand-462209-t4
+* gcloud container clusters create-auto hello-cluster (post setting the project and region ID)
+
+=== Deploying the app on the cluster
+* gcloud container clusters get-credentials hello-cluster --region asia-south1 ?(what does this do)
+
+* K8 deployment object creation
+
+** kubectl create deployment hello-app --image=asia-south1-docker.pkg.dev/civic-brand-462209-t4/test-repo/hello-app:v1
+** kubectl scale deployment hello-app --replicas=3
+** kubectl autoscale deployment hello-app --cpu-percent=80 --min=1 --max=5
+
+** kubectl get pods  // gives the active pods
+
+=== Exposing the app to the internet
+
+* Services: (https://cloud.google.com/kubernetes-engine/docs/concepts/network-overview#services)
+** Groups pocs into one static IP address
+** GKE assigns DNS hostname
+** The default Service type in GKE is called ClusterIP, where the Service gets an IP address reachable only from inside the cluster.
+** To expose a Kubernetes Service outside the cluster, create a Service of type LoadBalancer (https://cloud.google.com/kubernetes-engine/docs/concepts/network-overview#ext-lb). This type of Service spawns an External Load Balancer IP for a set of Pods, reachable through the internet.
+
+* Creating service
+** kubectl expose deployment hello-app --name=hello-app-service --type=LoadBalancer --port 80 --target-port 8080
+** kubectl get service
+*** This generates  external_ip that would be access from internet
+
+=== Updates
+
+* Rolling updates
+
+
+
+=== Destroy
+** kubectl delete service hello-app-service
+** gcloud container clusters delete hello-cluster --region asia-south1
+
+gcloud artifacts docker images delete \
+    asia-south1-docker.pkg.dev/civic-brand-462209-t4/test-repo/hello-app:v1 \
+    --delete-tags --quiet
+
+gcloud artifacts docker images delete \
+    asia-south1-docker.pkg.dev/civic-brand-462209-t4/test-repo/hello-app:v2 \
+    --delete-tags --quiet
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

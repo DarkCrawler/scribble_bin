@@ -1,0 +1,71 @@
+== Contact Information
+=== Full name: Tushar Bisht
+
+=== Phone number: 8971030030
+
+===  Email address: tushar.bisht10@sabre.com
+
+===  LinkedIn (optional):
+
+=== Blog site: https://wanderingbisht.wordpress.com/
+
+
+== Professional Summary
+Strategic and hands-on Director of Software Architecture with over 11 years of experience architecting and delivering enterprise-grade systems,
+with deep expertise in the airlines industry and a strong foundation in financial application development. Proven ability to lead the design of both transactional platforms and machine learning-driven solutions,
+balancing innovation with scalability and reliability. Passionate about solving complex problems through technology, mentoring technical teams, and aligning architecture with long-term business goals.
+Known for building cloud-native, high-availability systems that operate at global scale, and for driving modernization efforts through microservices, event-driven architectures, and data-centric designs.
+
+== Work Experience
+
+Present : Sabre Travel Technologies
+Tenure : 2013 till date
+
+=== Director of Software Architecture — Sabre, [Location]
+==== Tenure : 2023 – Present
+==== Highlights
+* Lead architecture for multiple enterprise airline commerce systems with a focus on machine learning and offer optimization platforms.
+* Own end-to-end technical strategy, mentoring, and execution in high-impact product areas.
+* Spearheaded architecture for the Offer Optimization suite supporting the shift to Offer/Order-based airline retailing.
+* Drove expansion of ML-based products, building the foundation for Ancillary IQ, followed by successful launches of Bundles IQ and Upgrades IQ.
+* Collaborated cross-functionally with product, data science, and engineering to operationalize models into scalable, customer-facing systems.
+* Enabled cloud-native transformations through microservices, Kafka-based event streaming, and CI/CD practices.
+
+=== Software Architect   — Sabre
+==== Tenure : 2021 - 2023
+==== Highlights
+
+* Led architectural efforts on core airline pricing and revenue management systems with a focus on performance, reliability, and extensibility.
+* Designed large-scale components for Revenue Optimizer and Fares Optimizer, improving price accuracy and reducing compute overhead.
+* Partnered with stakeholders to modernize legacy pricing engines and align with evolving IATA and NDC standards.
+* Mentored engineers and helped build reusable patterns that improved time-to-market across products.
+
+Software Engineer → Lead Engineer — Sabre
+2012 – 2016
+Contributed to full-stack development and architecture of pricing, fare, and offer-related applications. Progressively took on technical leadership roles and complex systems initiatives.
+
+Developed and optimized backend systems for fare calculation and rule enforcement at scale.
+
+Initiated performance profiling and tuning that led to 30%+ improvements in fare search response times.
+
+Took on tech lead responsibilities for cross-functional feature deliveries.
+
+4. Education
+Degree:
+
+School:
+
+Graduation year (or expected graduation):
+
+Honors, GPA (optional):
+
+5. Skills
+List your relevant technical, soft, and/or language skills.
+
+6. Certifications or Awards (optional)
+Include any certifications, licenses, or recognitions.
+
+7. Projects or Publications (optional)
+Include notable personal or professional projects.
+
+Once I have this information, I’ll generate your resume in a clean and modern format. You can also tell me what kind of job or industry you're targeting so I can tailor the resume.

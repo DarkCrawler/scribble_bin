@@ -1,0 +1,79 @@
+== Log 1: 7th April 25
+
+* Trying to setup docker for UIQ repository
+
+=== Using remote repository to take base image
+
+* Taking base image from a restricted repository
+
+''''
+
+ ARG IMAGE_REPO=repository.xxx.com:ppp
+ FROM $IMAGE_REPO/sabre/base-images/ubi8/openjdk-17-runtime:latest
+ #taking image from private  repo
+
+''''
+
+* Challenge # 1 : Authenticating to the remote repo
+** Was already logged into docker desktop using my credentials (private), and docker login from control was not able to add authentication
+** the dicker config (~/.docker/config.json) had "currentContext": "desktop-linux", that was not allowing to update auths block
+** Resolution
+*** remove currentContext from the block
+*** do a docker login
+*** add in currentContext later on
+
+* Things to learn
+** What is auths in docker config
+** What is currentContext and how can auths and currentContext live together
+** See if docker desktop is working fine post removal of current context (is it able to access the repo )
+
+=== Final creation of docker file
+
+[source,ruby]
+----
+ARG IMAGE_REPO=repository.xxx.com:PPP  # remote private repo with PORT
+
+FROM $IMAGE_REPO/sabre/base-images/ubi8/openjdk-17-runtime:latest # pulling base image
+
+# copying the jar file in the image
+ARG ARTIFACT_DIR
+COPY $ARTIFACT_DIR /deployments/app.jar
+
+# ALT : doing this in the image itself (? is there any problem that we do this)
+COPY build/libs/skibidi-1.0.0.jar /deployments/app.jar
+
+
+# To install additional software
+# changing the user to root, so that creation of DIRs can be done
+
+USER root
+
+# Create the logs directory
+#for log4j file appends
+RUN mkdir /logs && chmod -R 777 /logs
+
+RUN microdnf update && microdnf install procps
+# USER 185
+EXPOSE 8000 8001
+
+WORKDIR /
+
+CMD ["java", "-jar", "/deployments/app.jar"]
+
+----
+
+=== Docker commands learnt
+
+* Docker build command by passing arguments that would be used in the docker file
+** docker build -t skibi-engine:latest --build-arg ARTIFACT_DIR=/build/libs/skibidi-1.0.0.jar .
+
+* Docker enter into a container
+** Using google credentials (in case any dependency requires the credentials files)
+** -it and entrypoint logs to shell command
+[source,dockerfile]
+----
+docker run -it -p 8000:8000 -p 8001:8001 -v ~/.config/gcloud/application_default_credentials.json:/root/.config/application_default_credentials.json -e GOOGLE_APPLICATION_CREDENTIALS='/root/.config/application_default_credentials.json' --entrypoint sh 65c39b6bfaa1
+----
+
+
+
