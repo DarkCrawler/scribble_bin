@@ -1,0 +1,66 @@
+{
+  "ks_result": [
+    {
+      "bid_id": 1,
+      "total_bid_vale": 1001,
+      "pax_count": 2
+    },
+    {
+      "bid_id": 4,
+      "total_bid_vale": 2001,
+      "pax_count": 3
+    }
+  ],
+  "ks_result_sale_value": 3002,
+  "sp_result": [
+    {
+      "bid_id": 3,
+      "total_bid_vale": 301,
+      "pax_count": 1
+    },
+    {
+      "bid_id": 6,
+      "total_bid_vale": 2001,
+      "pax_count": 2
+    }
+  ],
+  "sp_resul_sale_value": 2302,
+  "normalized_score": [
+    {
+      "bid_id": 1,
+      "total_bid_vale": 1001,
+      "pax_count_score": 1.2,
+      "fqt_score": 1.1,
+      "fbc_score": 0.8,
+      "purchase_history_score": 1.1,
+      "normalized_bid": 1480
+    },
+    {
+      "bid_id": 2,
+      "total_bid_vale": 1001,
+      "pax_count_score": 1.2,
+      "fqt_score": 1.1,
+      "fbc_score": 0.8,
+      "purchase_history_score": 1.1,
+      "normalized_bid": 1480
+    },
+    {
+      "bid_id": 3,
+      "total_bid_vale": 1001,
+      "pax_count_score": 1.2,
+      "fqt_score": 1.1,
+      "fbc_score": 0.8,
+      "purchase_history_score": 1.1,
+      "normalized_bid": 1480
+    },
+    {
+      "bid_id": 4,
+      "total_bid_vale": 1001,
+      "pax_count_score": 1.2,
+      "fqt_score": 1.1,
+      "fbc_score": 0.8,
+      "purchase_history_score": 1.1,
+      "normalized_bid": 1480
+    }
+  ]
+}

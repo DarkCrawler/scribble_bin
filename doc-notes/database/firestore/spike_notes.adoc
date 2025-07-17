@@ -1,4 +1,0 @@
-* creating database in native mode (to experiment real time queries)
-
-? What are the rules  : production vs test (same as access, but what all are present)
-(these rules were asked during creation of database )

@@ -1,0 +1,115 @@
+{
+  'normalized_score': [
+    {
+      'bid_id': 'BID001',
+      'total_bid_vale': 2242.0,
+      'fft_score': 1.2,
+      'fbc_score': 1.1,
+      'purchase_history_score': 1.0,
+      'normalized_bid': 1480,
+      'total_normalized_bid': 2960,
+      'bid_priority_score': 2
+    },
+    {
+      'bid_id': 'BID002',
+      'total_bid_vale': 3915.0,
+      'fft_score': 1.1,
+      'fbc_score': 1.05,
+      'purchase_history_score': 0.8,
+      'normalized_bid': 1206,
+      'total_normalized_bid': 3618,
+      'bid_priority_score': 1
+    },
+    {
+      'bid_id': 'BID003',
+      'total_bid_vale': 1333.0,
+      'fft_score': 1.2,
+      'fbc_score': 1.0,
+      'purchase_history_score': 0.8,
+      'normalized_bid': 1280,
+      'total_normalized_bid': 1280,
+      'bid_priority_score': 5
+    },
+    {
+      'bid_id': 'BID004',
+      'total_bid_vale': 2366.0,
+      'fft_score': 1.0,
+      'fbc_score': 1.1,
+      'purchase_history_score': 0.8,
+      'normalized_bid': 1041,
+      'total_normalized_bid': 2082,
+      'bid_priority_score': 3
+    },
+    {
+      'bid_id': 'BID005',
+      'total_bid_vale': 1120.0,
+      'fft_score': 1.1,
+      'fbc_score': 1.0,
+      'purchase_history_score': 0.5,
+      'normalized_bid': 616,
+      'total_normalized_bid': 616,
+      'bid_priority_score': 7
+    },
+    {
+      'bid_id': 'BID006',
+      'total_bid_vale': 1460.0,
+      'fft_score': 1.0,
+      'fbc_score': 1.1,
+      'purchase_history_score': 1.0,
+      'normalized_bid': 1606,
+      'total_normalized_bid': 1606,
+      'bid_priority_score': 4
+    },
+    {
+      'bid_id': 'BID007',
+      'total_bid_vale': 1084.0,
+      'fft_score': 1.0,
+      'fbc_score': 1.05,
+      'purchase_history_score': 1.0,
+      'normalized_bid': 1138,
+      'total_normalized_bid': 1138,
+      'bid_priority_score': 6
+    }
+  ],
+  'sp_result': [
+    {
+      'bid_id': 'BID002',
+      'bid_priority_score': 1,
+      'pax_count': 3,
+      'total_normalized_bid': 3618,
+      'total_bid_amount': 3915.0
+    },
+    {
+      'bid_id': 'BID006',
+      'bid_priority_score': 4,
+      'pax_count': 1,
+      'total_normalized_bid': 1606,
+      'total_bid_amount': 1460.0
+    }
+  ],
+  'ks_result': [
+    {
+      'bid_id': 'BID001',
+      'bid_priority_score': 2,
+      'pax_count': 2,
+      'total_normalized_bid': 2960,
+      'total_bid_amount': 2242.0
+    },
+    {
+      'bid_id': 'BID003',
+      'bid_priority_score': 5,
+      'pax_count': 1,
+      'total_normalized_bid': 1280,
+      'total_bid_amount': 1333.0
+    },
+    {
+      'bid_id': 'BID006',
+      'bid_priority_score': 4,
+      'pax_count': 1,
+      'total_normalized_bid': 1606,
+      'total_bid_amount': 1460.0
+    }
+  ],
+  'ks_result_sale_value': 5035.0,
+  'sp_resul_sale_value': 5375.0
+}

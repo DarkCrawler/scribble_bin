@@ -1,0 +1,105 @@
+This function, `knapsack_from_dataframe(df, max_capacity)`, implements a **0/1 Knapsack Problem** using **Dynamic Programming (DP)**. It takes a Pandas DataFrame (`df`) and a maximum capacity (`max_capacity`) as input and returns the optimal selection of items along with the maximum total value.
+
+---
+
+### **Breakdown of the Code**
+#### **1. Extracting Data from the DataFrame**
+```python
+n = len(df)
+values = df["total_bid_value"].tolist()
+weights = df["pax_count"].tolist()
+items = df["order_id"].tolist()
+```
+- `n`: The number of items (rows in the dataframe).
+- `values`: List of total bid values (profit of each item).
+- `weights`: List of pax counts (weight of each item).
+- `items`: List of order IDs (used for tracking selected items).
+
+---
+
+#### **2. Initializing the DP Table**
+```python
+dp = np.zeros((n + 1, max_capacity + 1))
+```
+- Creates a **2D array (table) of size `(n+1) x (max_capacity+1)`**, initialized with zeros.
+- `dp[i][w]` will store the **maximum total value** possible using the first `i` items and capacity `w`.
+
+##### **Printing the DP Table**
+```python
+print(type(dp))
+print(dp)
+```
+- Prints the type of `dp` (should be `<class 'numpy.ndarray'>`).
+- Prints the initial DP table (all zeros).
+
+---
+
+#### **3. Filling the DP Table (Dynamic Programming)**
+```python
+for i in range(1, n + 1):
+    for w in range(1, max_capacity + 1):
+        if weights[i - 1] <= w:
+            dp[i][w] = max(dp[i - 1][w], dp[i - 1][w - weights[i - 1]] + values[i - 1])
+        else:
+            dp[i][w] = dp[i - 1][w]
+```
+- Iterates over items `i` (1 to `n`) and capacities `w` (1 to `max_capacity`).
+- **If the item fits (`weights[i-1] <= w`)**, decide whether to:
+  - **Exclude it** (`dp[i-1][w]` remains the same).
+  - **Include it** (`dp[i-1][w - weights[i-1]] + values[i-1]`).
+  - Take the **maximum of both**.
+- **Else**, exclude the item (`dp[i][w] = dp[i-1][w]`).
+
+##### **Example**
+Let’s assume:
+| Item | Value | Weight |
+|------|------|------|
+| A    | 60   | 10   |
+| B    | 100  | 20   |
+| C    | 120  | 30   |
+
+For `max_capacity = 50`, the DP table fills up based on choices.
+
+##### **Printing the Final DP Table**
+```python
+print(dp)
+```
+- Prints the **final** DP table after computation.
+
+---
+
+#### **4. Traceback to Find Selected Items**
+```python
+w = max_capacity
+selected_items = []
+for i in range(n, 0, -1):
+    if dp[i][w] != dp[i - 1][w]:  # Item was included
+        selected_items.append(items[i - 1])
+        w -= weights[i - 1]
+```
+- Starts from the last row (`dp[n][max_capacity]`) and **traces back** to find which items contributed to the optimal value.
+- **If `dp[i][w]` differs from `dp[i-1][w]`**, the item was included.
+- Reduces `w` by the weight of the included item (`w -= weights[i - 1]`).
+
+---
+
+#### **5. Returning Selected Items & Maximum Value**
+```python
+df_selected = df[df["order_id"].isin(selected_items)].reset_index(drop=True)
+
+return df_selected, dp[n][max_capacity]
+```
+- Filters the original DataFrame (`df`) to include only the selected items.
+- **Returns**:
+  1. `df_selected`: A DataFrame containing the chosen items.
+  2. `dp[n][max_capacity]`: The **maximum value** that can be obtained within `max_capacity`.
+
+---
+
+### **Key Takeaways**
+- Uses **Dynamic Programming** to solve the **0/1 Knapsack Problem**.
+- Stores results in a **2D DP table** to avoid redundant calculations.
+- Performs **traceback** to extract selected items.
+- Efficient for moderate values of `n` and `max_capacity` (typically `O(n × max_capacity)` complexity).
+
+Would you like a **step-by-step example** with real values? 🚀

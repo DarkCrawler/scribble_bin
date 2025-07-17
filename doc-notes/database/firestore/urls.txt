@@ -1,9 +1,0 @@
-* firestore with
-https://cloud.google.com/firestore/mongodb-compatibility/docs/behavior-differences
-https://cloud.google.com/firestore/mongodb-compatibility/docs/supported-data-types-drivers
-
-
-https://www.youtube.com/watch?v=Bw6EtlZrsi0
-https://www.youtube.com/watch?v=Bw6EtlZrsi0
-https://www.youtube.com/watch?v=Bw6EtlZrsi0
-https://www.youtube.com/watch?v=Bw6EtlZrsi0
