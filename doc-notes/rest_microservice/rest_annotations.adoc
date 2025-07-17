@@ -1,0 +1,18 @@
+@RestControllerAdvice
+
+
+  @ExceptionHandler(ValidationException.class)
+USE --?
+public ResponseEntity<Object> handleValidationException(ValidationException ex) {
+    List<ErrorResponseDetailsInner> details = ex.getErrors().stream()
+        .map(err -> new ErrorResponseDetailsInner(err.getField(), err.getIssue()))
+        .collect(Collectors.toList());
+    return ResponseEntity.badRequest().body(
+      ErrorResponse.builder()
+          .code("400")
+          .message("Invalid request")
+          .details(details)
+          .build()
+    );
+  }
+

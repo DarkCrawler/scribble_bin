@@ -1,0 +1,108 @@
+=== Here's an explanation of how Firestore processes writes using **Spanner transactions** with a diagram:
+
+---
+
+## **Firestore Write Flow in Spanner (Restaurant Ratings Example)**
+
+📌 **Scenario:**
+A user adds a **new rating** to a restaurant. This involves:
+- **Inserting a new rating document** (`/restaurants/one/ratings/2`)
+- **Updating the restaurant's `numRatings` and `avgRatings` fields** (`/restaurants/one`)
+
+This operation **must be atomic**, ensuring data consistency across Firestore and its Spanner-backed storage.
+
+---
+
+### **📌 Step-by-Step Flow of the Transaction**
+### **1️⃣ Firestore Backend Starts a Spanner Transaction**
+- A **read-write transaction `T`** is created in **Spanner**.
+
+### **2️⃣ Read & Lock Affected Documents**
+- Read `/restaurants/one` and `/restaurants/one/ratings/2` from **Spanner's Entities table**.
+- **Exclusive locks** are acquired to prevent conflicting writes.
+- Verify that:
+  ✅ The restaurant **exists** (`/restaurants/one`).
+  ✅ The new rating **does not exist yet** (`/restaurants/one/ratings/2`).
+
+### **3️⃣ Apply Firestore Security Rules**
+- Firestore evaluates security rules for:
+  - The **restaurant document** (`/restaurants/one`).
+  - The **new rating document** (`/restaurants/one/ratings/2`).
+- If the request passes security rules, proceed.
+
+### **4️⃣ Compute Index Entry Changes**
+- **Old index entries for `numRatings` and `avgRatings` are removed**.
+- **New index entries for updated `numRatings` and `avgRatings` are added**.
+- **New index entries are created for the rating document (`/restaurants/one/ratings/2`)**.
+- These changes are **batched into transaction `T`**.
+
+### **5️⃣ Prepare Two-Phase Commit with Real-time Cache**
+- Choose **max commit timestamp `M`**.
+- Send **Prepare RPCs** to Real-time Cache to synchronize **commit timestamps** (`mi`).
+
+### **6️⃣ Commit Transaction in Spanner**
+- Spanner commits **all updates atomically**, ensuring:
+  ✅ **Entities table updates** (restaurant & rating documents).
+  ✅ **IndexEntries table updates** (index changes).
+- **Additional exclusive locks** on IndexEntries rows prevent conflicts.
+- Since **Spanner partitions data across tablets and servers**, this commit could involve multiple machines.
+
+### **7️⃣ Finalize Commit with Real-time Cache**
+- Send **Accept RPCs** to Real-time Cache, ensuring it has:
+  ✅ **Deleted documents**
+  ✅ **Full copies of inserted documents**
+  ✅ **Modified documents with changes**
+- Real-time Cache tracks these updates **in memory** in **timestamp order** for real-time queries.
+
+---
+
+## **📌 Firestore Write Flow Diagram**
+
+```plaintext
+ ┌──────────────────────────┐
+ │  Firestore Client (User) │
+ └──────────┬───────────────┘
+            │
+            ▼
+ ┌──────────────────────────┐
+ │  Firestore Backend       │
+ └──────────┬───────────────┘
+            │
+  ┌────────▼────────┐
+  │ Start Txn (T)   │
+  └────────┬────────┘
+            │
+  ┌────────▼────────┐
+  │ Read & Lock Docs│
+  └────────┬────────┘
+            │
+  ┌────────▼────────┐
+  │ Check Security  │
+  └────────┬────────┘
+            │
+  ┌────────▼────────────┐
+  │ Compute Index Changes │
+  └────────┬────────────┘
+            │
+  ┌────────▼────────────┐
+  │ Prepare Real-time Cache │
+  └────────┬────────────┘
+            │
+  ┌────────▼───────────┐
+  │ Commit Txn in Spanner │
+  └────────┬───────────┘
+            │
+  ┌────────▼─────────────┐
+  │ Sync with Real-time Cache │
+  └──────────────────────────┘
+```
+
+---
+
+### **🔥 Key Takeaways**
+✔ Firestore uses **Spanner transactions** to ensure consistency.
+✔ **Index updates happen within the same transaction**, ensuring atomicity.
+✔ **Real-time Cache** keeps track of changes for live queries.
+✔ **Two-phase commit** ensures Spanner and Real-time Cache stay in sync.
+
+Would you like a more detailed breakdown of **Real-time Cache mechanics**? 🚀

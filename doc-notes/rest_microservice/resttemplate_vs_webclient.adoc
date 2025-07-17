@@ -1,0 +1,236 @@
+== Definitions
+
+=== RestTemplate
+
+* Spring RestTemplate is a Synchronous client to perform HTTP requests.
+* It simplifies the process of interacting with external APIs by abstracting much of low-level HTTP handling, thus you can focus on business logic instead.
+* provides a set of HTTP methods like (GET, PUT, POST, etc.) [automatically handles serialization and de-serialization for request and response thus making it easier to work with JSON & XML data]
+
+* Template has some methods :
+
+** getForEntity(): executes a GET request and returns an object of ResponseEntity class that contains both the status code and the response as an object type.
+** getForObject() : quite similar to getForEntity(), but returns the resource directly.
+** exchange(): executes a specified HTTP method, such as GET, POST, PUT, etc. and returns a ResponseEntity containing both the HTTP status code and the resource as an object.
+** execute() : similar to the exchange() method, but takes additional parameters: RequestCallback and ResultSetExtractor.
+** delete(): deletes the resources at the given URL using the HTTP DELETE method.
+** put(): updates a resource for a given URL using the HTTP PUT method.
+** postForObject() : creates a new resource using the HTTP POST method and returns an entity.
+
+=== Spring Webclient
+
+* Spring WebClient is asynchronous and non-blocking in nature, opposite to the rest-template.
+* It follows the event-driven approach from the reactive framework of Spring Webflux.
+The client need not wait for the response from the server, as it gets notified by the callback method once the response is received.
+
+=== Comparisions points (quick notes)
+
+|===
+| Web-client |  Rest Template
+| sync & async both | only sync
+| seems to have better error handling * | error handling in try catch
+| seems suited for microservice |  good for monotliths
+| non blocking | blocking (blocks the thread in servlet API since it releases only when it gets a response)
+|===
+
+== Quick POC notes on webclient
+
+* create an instance
+* make a request
+* handle a response
+
+=== Creating a webclient
+
+[NOTE]
+====
+* Webclient can be initialized with DefaultWebClientBuilder , this seems to be a complex class, should know what all the default constructor uses
+* Use client connector to specify client connection properties (HTTPClient object)
+
+[source,java]
+----
+HttpClient httpClient = HttpClient.create()
+  .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+  .responseTimeout(Duration.ofMillis(5000))
+  .doOnConnected(conn ->
+    conn.addHandlerLast(new ReadTimeoutHandler(5000, TimeUnit.MILLISECONDS))
+      .addHandlerLast(new WriteTimeoutHandler(5000, TimeUnit.MILLISECONDS)));
+
+WebClient client = WebClient.builder()
+  .clientConnector(new ReactorClientHttpConnector(httpClient))
+  .build();
+----
+
+====
+
+=== Preparing a request
+
+==== Sample 1 (simple post request)
+
+[source,java]
+----
+Mono<ResponseEntity<DummyResponse>> response = testWebClient.post().uri("upgrade/offers/generate")
+                .accept(MediaType.APPLICATION_JSON)
+                .headers(
+                        httpHeaders -> {
+                            httpHeaders.set("x-api-version", "1");
+                        }
+                )
+                .bodyValue(DummyModel.builder().orderId("123").build())
+                .retrieve()
+                .toEntity(DummyResponse.class)
+                .timeout(Duration.ofSeconds(3));
+----
+
+* A simple example
+* timeout :
+** This sets a timeout for how long the entire reactive chain is allowed to take, including (wraps entire operation):
+*** TCP connection
+*** DNS resolution
+*** Sending request
+*** Waiting for response
+*** Reading body
+*** Deserialization
+* timeout is for the whole operation, but incase we are not able to get a TCP handshake proerly we
+
+* In this example I am not specifying HTTP client which allows me to configure my httpclient better
+** HTTP client
+*** Sends request and gets response via HTTP / using TCP connection
+*** waits for the response
+** parses the response
+
+* response.block()
+** Reactive is lazy, it only runs whne we subscribe
+** subscription / trigger point
+** other methods
+*** reponse.subscribe()
+*** response.toFuture()
+** block() is a way of forcing it to run, synchronously.
+** In a fully non-blocking flow, you'd use subscribe(), flatMap(), or chain the Mono to some reactive return type.
+** Ideally block should be avoided since it makes it a blocking call
+** Instead of block return the mono (spring would take care of reactive async)
+** Need to see how susbscribe and future helps
+
+* Since the above example is not streaming, we use Mono else for streaming we can use flux
+
+
+* Topics summary - for further study
+
+|===
+|Topics | Subtopic
+|Timeouts | types , levels and impact
+| Mono & Flux | use, features
+| Subscription | response.block Vs subscribe Vs toFuture
+|===
+
+=== Timeouts in reactive
+
+==== Response time out
+
+* response timeout is the time we wait to receive a response after sending a request
+
+[source,java]
+----
+HttpClient client = HttpClient.create()
+  .responseTimeout(Duration.ofSeconds(1));
+----
+
+==== Connection time out
+
+* connection was not made
+* a period within which a connection between a client and a server must be established
+
+----
+HttpClient client = HttpClient.create()
+  .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
+----
+
+* Keep alive options can be used (* needs more study)
+
+----
+HttpClient client = HttpClient.create()
+  .option(ChannelOption.SO_KEEPALIVE, true)
+  .option(EpollChannelOption.TCP_KEEPIDLE, 300)
+  .option(EpollChannelOption.TCP_KEEPINTVL, 60)
+  .option(EpollChannelOption.TCP_KEEPCNT, 8);
+----
+
+** ChannelOption.SO_KEEPALIVE, true
+
+*** Enables TCP Keep-Alive.
+*** Tells the OS: "If the connection is idle, send periodic probes to keep it alive."
+*** Helps detect broken connections even if no data is being sent.
+
+** EpollChannelOption.TCP_KEEPIDLE, 300
+
+*** After 300 seconds (5 minutes) of no data, start sending Keep-Alive probes.
+
+** EpollChannelOption.TCP_KEEPINTVL, 60
+
+*** Wait 60 seconds between each Keep-Alive probe.
+
+** EpollChannelOption.TCP_KEEPCNT, 8
+
+*** Send up to 8 probes before considering the connection dead.
+
+[NOTE]
+====
+"I want TCP Keep-Alive enabled.
+If the connection is idle for 5 minutes, start sending small 'Are you still there?' packets every 60 seconds.
+If I don't hear back after 8 tries, drop the connection."
+====
+
+* Why keep alive ?
+
+** Keeps connections alive through firewalls/load balancers that kill idle sockets.
+
+** Detects dead peers if the remote system crashes or the network drops.
+
+** Useful in long-lived or reused HTTP connections (like WebClient).
+??
+
+* ConnectTimeoutException is thrown
+
+==== Read and write timeout
+
+* connection was made but
+** no data was read within a certain period of time,
+** while the write timeout when a write operation cannot finish at a specific time
+
+----
+HttpClient client = HttpClient.create()
+  .doOnConnected(conn -> conn
+    .addHandler(new ReadTimeoutHandler(10, TimeUnit.SECONDS))
+    .addHandler(new WriteTimeoutHandler(10)));
+----
+
+* ReadTimeoutException and WriteTimeoutException are thrown
+
+==== SSL / TLS timeout
+
+* the duration in time that the system tries to establish an SSL connection before halting the operation
+
+----
+HttpClient.create()
+  .secure(spec -> spec.sslContext(SslContextBuilder.forClient())
+    .defaultConfiguration(SslProvider.DefaultConfigurationType.TCP)
+    .handshakeTimeout(Duration.ofSeconds(30))
+    .closeNotifyFlushTimeout(Duration.ofSeconds(10))
+    .closeNotifyReadTimeout(Duration.ofSeconds(10)));
+----
+
+* basics:
+** What is SSL / TLS time out
+*** SSL (Secure Sockets Layer) and TLS (Transport Layer Security) are cryptographic protocols.
+*** They are used to secure communication between a client and a server over the network (e.g., HTTPS, FTPS).
+*** When you visit https://example.com, the underlying secure connection uses TLS (SSL is deprecated, TLS is its modern replacement).
+
+=== Mono & Flux
+
+=== Subscription
+
+=== Rough pointers for future
+
+* event loop (this makes netty / reactor async)
+
+
+
+
