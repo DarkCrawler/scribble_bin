@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.grpc.server'
+version = '1.0.0'
+
+
+dependencies {
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -24,3 +24,14 @@ rootProject.name = 'jscribs'
 include 'skibidi'
 
 project(':skibidi').name = 'skibidi'
+
+include 'grpc_tutorials'
+
+include 'grpc_tutorials:grpc_server'
+findProject(':grpc_tutorials:grpc_server')?.name = 'grpc_server'
+
+include 'grpc_tutorials:grpc_client'
+findProject(':grpc_tutorials:grpc_client')?.name = 'grpc_client'
+include 'grpc_tutorials:gprc_proto_def'
+findProject(':grpc_tutorials:gprc_proto_def')?.name = 'gprc_proto_def'
+
