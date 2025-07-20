@@ -8,4 +8,3 @@ import "org/gprc/protodef/messages/helloservice/HelloMessages.proto";
 service HelloService {
   rpc hello(org.gprc.protodef.messages.helloservice.HelloRequest) returns (org.gprc.protodef.messages.helloservice.HelloResponse);
 }
-
