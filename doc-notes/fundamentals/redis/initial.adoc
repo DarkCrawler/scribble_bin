@@ -1,0 +1,8 @@
+* practical links https://redis.io/docs/latest/develop/clients/jedis/
+
+
+ngp ci deploy -l  debug --skip-update-check --disable-image-validation --cluster-name "dev-02-u0vc" --namespace "ri-ci-stp-tb" --app-name "owl" --app-version "tb-test" --strategy "com.sabre.ngp-cicd:deployment-stragy:1.0.11" --app-config "GCP-CI" --nexusserver "repository.sabre-gcp.com" --nexus-user "${NEXUS_USERNAME}" --nexus-password "${NEXUS_TOKEN}" --sa-user "ci-deployer"  --sa-token $(gcloud container clusters get-credentials dev-02-u0vc --region us-east4  --project sab-dev-cluster-2713 && kubectl create token -n ri-ci ci-deployer)
+
+
+ngp  ci deploy -l  debug --skip-update-check --disable-image-validation --cluster-name "dev-02-u0vc" --namespace "ri-ci-stp-tb" --app-name "owl" --app-version "tb-test" --strategy "com.sabre.ngp-cicd:deployment-strategy:1.0.11" --app-config "GCP-CI" --nexusserver "repository.sabre-gcp.com" --nexus-user "${NEXUS_USERNAME}" --nexus-password "${NEXUS_TOKEN}" --sa-user "ci-deployer"  --sa-token $(gcloud container clusters get-credentials dev-02-u0vc --region us-east4  --project sab-dev-cluster-2713 && kubectl create token -n ri-ci ci-deployer)
+

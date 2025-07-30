@@ -45,3 +45,5 @@ generated gRPC service uses:
 @io.grpc.stub.annotations.GrpcGenerated – for gRPC-specific tagging
 
 ====
+
+* use this for spring boot managed grpc project : https://www.baeldung.com/spring-boot-grpc
