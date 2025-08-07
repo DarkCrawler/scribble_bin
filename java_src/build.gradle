@@ -8,12 +8,12 @@
 plugins {
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.openapi.generator' version '7.13.0'
-    id 'org.springframework.boot' version '3.5.0-M2' apply false
+    id 'org.springframework.boot' version '3.5.4' apply false
 }
 
 
 ext {
-    springBootVersion = '3.5.0-M2'
+    springBootVersion = '3.5.4'
     springVersion = '6.2.5'
     springCloudGCP = '6.2.1'
 
@@ -37,20 +37,6 @@ allprojects {
 
     repositories {
         mavenCentral()
-        maven {
-            url = "https://repository.sabre-gcp.com/repository/maven-all"
-            credentials {
-                username = project.findProperty("mavenUser") ?: ""
-                password = project.findProperty("mavenPassword") ?: ""
-            }
-        }
-        maven {
-            url = "https://repository.sabre-gcp.com/repository/maven-thirdparty"
-            credentials {
-                username = project.findProperty("mavenUser") ?: ""
-                password = project.findProperty("mavenPassword") ?: ""
-            }
-        }
     }
 
 

@@ -8,14 +8,8 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
+        maven { url = uri("https://repo.spring.io/milestone") } // needed for 3.5.0-M2
         mavenCentral()
-        maven {
-            url = "https://repository.sabre-gcp.com/repository/maven-all"
-            credentials {
-                username = providers.gradleProperty("mavenUser").orNull
-                password = providers.gradleProperty("mavenPassword").orNull
-            }
-        }
     }
 }
 
