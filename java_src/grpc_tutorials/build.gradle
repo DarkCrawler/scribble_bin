@@ -3,7 +3,7 @@ plugins {
     id 'com.google.protobuf' version '0.9.4'
 }
 
-group = 'com.sabre.uiq.owl'
+group = 'org.grpc'
 version = '1.0.0'
 
 subprojects {

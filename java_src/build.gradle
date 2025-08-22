@@ -110,35 +110,6 @@ subprojects {
     }
 
 
-//    def dockerBuildProjects = ['uiq-bolt', 'skibidi']
-//
-//    dockerBuildProjects.each { subprojectName ->
-//        def sub = project(":$subprojectName")
-//        def imageName = "${sub.name}:${sub.version}"
-//        def artifactPath = "build/libs/${sub.name}-${sub.version}.jar"
-//
-//        sub.afterEvaluate {
-//            if (!sub.tasks.findByName("dbuild")) {
-//                sub.tasks.register("dbuild", Exec) {
-//                    group = 'docker'
-//                    description = 'Builds Docker image using CLI'
-//
-//                    dependsOn sub.tasks.named("build") // lazy dependency
-//
-//                    doFirst {
-//
-//                        println "Building Docker image: $imageName"
-//
-//                        commandLine 'docker', 'build',
-//                                '-t', imageName,
-//                                '--build-arg', "ARTIFACT_DIR=${artifactPath}",
-//                                '.'
-//                    }
-//                }
-//            }
-//        }
-//    }
-
     dependencyManagement {
         imports {
             mavenBom "com.google.cloud:libraries-bom:${gcpBOMVersion}"

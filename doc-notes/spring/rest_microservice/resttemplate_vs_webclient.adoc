@@ -67,7 +67,7 @@ WebClient client = WebClient.builder()
 
 [source,java]
 ----
-Mono<ResponseEntity<DummyResponse>> response = testWebClient.post().uri("upgrade/offers/generate")
+Mono<ResponseEntity<DummyResponse>> response = testWebClient.post().uri("some/url")
                 .accept(MediaType.APPLICATION_JSON)
                 .headers(
                         httpHeaders -> {
