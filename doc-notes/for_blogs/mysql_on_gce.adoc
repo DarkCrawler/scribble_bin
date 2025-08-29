@@ -1,0 +1,223 @@
+:sectnums:
+
+= MY_SQL ON GCE Blog Journey
+
+== Target
+
+* host mysql (self-managed MySQL) on GCP for team to use
+* able to connect to the instance via workbench in safe restricted manner from local laptop (since there is not console to manage on GCP)
+* able to connect local python or java development to this instance so that we dont have to deploy to GCP
+* able to connect via GCE / GKE instance hosting the microservice
+
+== Step 1 : Setting up the GCE
+
+=== A: Using console to create a GCE VM
+
+* Standard process
+* Call outs
+** Used e2-small (2 vCPUs, 2 GB Memory) [for POC purpose, I would not want the cost to spiral - would be monitoring this from price prespective]
+** Did not allow external HTTP traffic, I would be relying on TCP port to create an SSH tunnel to connect my workbench
+
+[CAUTION]
+====
+* I still need to check if not opening HTTP port would impact connection from my API, although eventually the API would be hosting on GCE so it should not matter a lot
+
+* I need to factor in how TCP packets would impact network cost
+====
+
+* I used ubuntu
+* I did not specify any firewall rules for following reasons
+** It was fixating on my IP address (thus exposing the database on external network)
+** It would have been a issue to onboard other memebers of the team
+** Would have costed more
+
+[NOTE]
+====
+
+* Hostname : GCP VM have 3 different hostname
+** internal : to be used within VPC
+** external : GCP assigned IP (DNS name would be assigned too)
+** custom : custom hostname
+
+* IP forwarding :
+** When you enable IP forwarding on a VM, it means that the VM is allowed to forward network traffic that is not destined for itself. (generally used when the VM is supposed to be used for router, load balancer, VPN gateway, NAT instance)
+
+
+* Network Interfaces :
+
+** A network interface is how your VM connects to a VPC network
+
+** Each interface has:
+*** A VPC network (default or custom).
+*** A subnet (region-specific).
+*** An internal IP address (used for VM-to-VM communication inside the VPC).
+*** Optionally, an external IP address (used to reach the VM from the internet, like your laptop).
+
+** Multiple interfaces are useful only if your VM needs to connect to multiple VPCs or networks
+** If you don’t assign an external IP, your VM is private-only (good for internal systems).
+
+====
+
+=== SSH ing into VM
+
+* Option 1 use GCP console SSH
+** Challenges
+*** Slow
+*** Can cause issue when we rely on SSH tunneling like processes
+
+* Option 2 : Use gcloud CLI
+
+** Activation
+
+*** gcloud auth login --account=startuptbn@gmail.com (and then use the right browser) : Adds account | Can add multiple accounts
+
+*** gcloud auth list : shows the accounts linked (there would be commands to activate other accounts)
+
+*** gcloud config set account ACCOUNT_EMAIL
+
+*** gcloud config set project <<>> : setting the project against which I want to use the CLI
+
+** SSH (without uploading any keys)
+
+*** I did not upload any keys
+
+[NOTE]
+====
+
+* Using configs in a better way :
+
+** gcloud config configurations create work
+** gcloud config set account mywork@gmail.com
+** gcloud config set project work-project-id
+** gcloud config configurations activate work
+====
+
+* SSH Command :
+
+```
+gcloud compute ssh startuptbn@mysql-instance --zone=us-central1-c
+```
+
+=== Setting up docker and running MYSQL on the VM
+
+* Docker installation
+
+```
+sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl start docker
+sudo systemctl enable docker
+```
+
+* Plain docker container run with mysql
+** Exposes post 3306
+** uses image mysql:8.0
+
+```
+sudo docker run --name mysql-container -e MYSQL_ROOT_PASSWORD=yourpassword -p 3306:3306 -d mysql:8.0
+```
+
+* Going to the mysql shell (within container)
+
+```
+sudo docker exec -it mysql-container mysql -u root -p
+```
+
+== MYSQL Ops
+
+* Creation of user that can login from any URL
+
+```
+CREATE USER 'youruser'@'%' IDENTIFIED BY 'yourpassword';
+GRANT ALL PRIVILEGES ON *.* TO 'youruser'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+```
+
+* Checking the users in mysql
+
+```
+SELECT user, host FROM mysql.user;
+```
+
+* Installing Mysql on VM and checking the MYSQL port exposure
+
+== Opening the SSH tunnel for local workbench access
+
+=== Why SSH ?
+
+1. Keep port 3306 closed to the outside world.
+2. Use an SSH connection to your VM (port 22 is already open for login).
+3. Forward traffic from a local port on your laptop (e.g. 3307) → to MySQL on the VM (localhost:3306).
+
+=== Using gcloud CLI to open SSH tunnel
+
+* GCE SSH only accepts SSH keys that are registered in the project metadata (through the console or gcloud).
+* Manual key can be generated and updated to Compute_engine -> metadata
+
+```
+    gcloud compute ssh startuptbn@mysql-instance --zone us-central1-c -- -L 3307:127.0.0.1:3306
+```
+
+* use vm_username@vm_name
+* 3307:127.0.0.1:3306 : ??
+
+=== Mysql Bind Address Change:
+
+* create mysql config file
+* File content:
+
+```
+[mysqld]
+bind-address = 0.0.0.0
+```
+
+[CAUTION]
+====
+* bind-address = 127.0.0.1 inside the container means MySQL only listens inside the container, not on the host VM network.
+* Docker’s -p 3306:3306 maps host port to container, but if MySQL itself binds only to localhost, the mapping doesn’t help.
+
+====
+
+* Running container with mysql config file
+
+```
+sudo docker run --name mysql-container  \
+-e MYSQL_ROOT_PASSWORD=pwd   \
+-p 127.0.0.1:3306:3306   \
+-v /home/mysql/data:/var/lib/mysql \
+-v /home/mysql/conf/my.cnf:/etc/mysql/my.cnf   \
+-d mysql:8.0
+```
+
+[NOTE]
+====
+*  ? 127.0.0.1:3306:3306
+*  ? use of bind address (difference between 0.0.0.0 and 127.0.0.1)
+====
+
+=== Work bench
+
+* Keep ssh tunnel open : gcloud compute ssh startuptbn@mysql-instance --zone us-central1-c -- -L 3307:127.0.0.1:3306
+* use standard TCP/IP
+** Hostname : 127.0.0.1 ( ? in the bind address 0.0.0.0 was put)
+** Port: 3307
+** username : username create with % (accept any host connection)
+** password as specified
+
+== Connecting from python (local machine)
+
+
+
+== Connecting from python (on GCP)
+
+== Taking backup of volumes mysql
+
+
+
+
+
+
+
+
+
+
